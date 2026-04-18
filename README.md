@@ -1,122 +1,142 @@
-# Stellar Notes DApp
+# Document Certificate DApp (Stellar + Soroban)
 
-**Stellar Notes DApp** - Blockchain-Based Decentralized Note-Taking System
+Document Certificate DApp is a decentralized anti-fraud application for issuing and verifying document certificates on the Stellar Soroban testnet.
 
-## Project Description
+The app does not store document files on-chain. It stores only the document hash and metadata, so users can prove authenticity without exposing private file contents.
 
-Stellar Notes DApp is a decentralized smart contract solution built on the Stellar blockchain using Soroban SDK. It provides a secure, immutable platform for managing personal notes directly on the blockchain. The contract ensures that your data is stored transparently and is only manageable through predefined smart contract functions, eliminating reliance on centralized database providers.
+## Application Description
 
-The system allows users to create, view, and delete notes, leveraging the efficiency and security of the Stellar network. Each note is uniquely identified and stored within the contract's instance storage, ensuring data persistence and reliability.
+This project provides a trustless certificate verification flow:
 
-## Project Vision
-
-Our vision is to revolutionize personal productivity in the digital age by:
-
-- **Decentralizing Data**: Moving note-taking from centralized servers to a global, distributed blockchain
-- **Ensuring Ownership**: Empowering users to have complete control and ownership over their digital thoughts and information
-- **Guaranteeing Immutability**: Providing a permanent, tamper-proof record of notes that cannot be altered or deleted by third parties
-- **Enhancing Privacy**: Leveraging blockchain security to protect personal information from unauthorized access
-- **Building Trustless Systems**: Creating a platform where data integrity is guaranteed by code, not by company promises
-
-We envision a future where digital information is truly personal and sovereign, empowering individuals with complete autonomy over their digital assets.
+- Issuers register a document certificate on-chain.
+- The frontend computes a SHA-256 hash in-browser.
+- Verifiers can upload a file (or paste a hash) to validate authenticity.
+- Issuers can revoke certificates, and revocation status is publicly auditable.
 
 ## Key Features
 
-### 1. **Simple Note Creation**
+- Wallet connection with Freighter (Stellar testnet)
+- Certificate issuance with metadata (`doc_name`, `note`, owner address)
+- Hash-based verification (`VALID` / `REVOKED`)
+- Per-user listing:
+- `Issued by Me`
+- `Owned by Me`
+- Issuer-only certificate revocation
 
-- Create notes with just one function call
-- Specify title and content for each note
-- Automated ID generation for unique identification
-- Persistent storage on the Stellar blockchain
+## Testnet Smart Contract
 
-### 2. **Efficient Data Retrieval**
+- Network: `Stellar Testnet`
+- Contract ID: `CB56EHRETWRDJTPDPOYBB3E3QBCDM7WUONACL4HIUXCUBHKLIXOA7R7U`
+- Stellar Expert: `https://stellar.expert/explorer/testnet/contract/CB56EHRETWRDJTPDPOYBB3E3QBCDM7WUONACL4HIUXCUBHKLIXOA7R7U`
 
-- Fetch all stored notes in a single call
-- Structured data representation for easy frontend integration
-- Quick access to your entire note collection
-- Real-time synchronization with the blockchain state
+## Testnet Screenshots
 
-### 3. **Secure Deletion**
+### Smart Contract (Testnet Explorer)
 
-- Remove specific notes using their unique IDs
-- Permanent removal from the contract storage
-- Clean and efficient storage management
-- Immediate update of the note list after deletion
+![Smart Contract Testnet](smartcontract.png)
 
-### 4. **Transparency and Security**
+### Frontend (Issue/Verify UI)
 
-- View all note activities on the blockchain
-- Blockchain-based verification of all storage actions
-- Immutable records of note creation and deletion
-- Protected against unauthorized modifications
+![Frontend Testnet](frontend.png)
 
-### 5. **Stellar Network Integration**
+## App Flow
 
-- Leverages the high speed and low cost of Stellar
-- Built using the modern Soroban Smart Contract SDK
-- Scalable architecture for growing note collections
-- Interoperable with other Stellar-based services
+1. `Issue`
+- Connect wallet
+- Fill owner address and document name
+- Upload document file
+- Hash is generated in browser
+- App calls `issue_certificate(...)`
 
-## Contract Details
+2. `Verify`
+- Upload file or paste hash
+- App calls `verify_by_hash(hash_hex)`
+- App shows certificate details and status
 
-Contract Address: CAWLJENIINEZJFQFC5VCB6VNRVJGSXO2L7DORGXLDNVBKT26RRHTUQFJ
-  ![alt text](smartcontract.png)
+3. `My Certificates`
+- Loads data from `get_by_issuer(address)` and `get_by_owner(address)`
+- Allows issuer to revoke using `revoke_certificate(...)`
 
-## Frontend Preview
+## Smart Contract API
 
-![alt text](frontend.png)
+- `issue_certificate(issuer, owner, hash_hex, doc_name, note) -> u64`
+- `verify_by_hash(hash_hex) -> Option<Certificate>`
+- `get_certificate(id) -> Option<Certificate>`
+- `get_by_owner(owner) -> Vec<Certificate>`
+- `get_by_issuer(issuer) -> Vec<Certificate>`
+- `revoke_certificate(issuer, id, reason) -> bool`
 
-## Future Scope
+## Project Structure
 
-### Short-Term Enhancements
+- `contracts/hello-world/src/lib.rs`: Soroban smart contract implementation
+- `contracts/hello-world/src/test.rs`: contract unit tests
+- `frontend/src/App.jsx`: main UI (Issue, Verify, My Certificates)
+- `frontend/src/hooks/useContract.js`: wallet + contract read/write layer
 
-1. **Note Encryption**: Support for end-to-end encryption of note content for enhanced privacy
-2. **Category Management**: Add tags and categories to organize notes efficiently
-3. **Rich Text Support**: Extend support beyond plain text to include Markdown and formatted content
-4. **Search Functionality**: Implement advanced search filters for large note collections
+## Requirements
 
-### Medium-Term Development
+- Rust toolchain
+- Soroban/Stellar CLI
+- Node.js and npm
+- Freighter wallet extension (testnet mode)
 
-5. **Collaborative Notes**: Implement multi-signature requirements for shared or collaborative note-taking
-   - Shared access for multiple addresses
-   - Permission-based editing and viewing
-   - Version history tracking
-6. **Notification System**: Off-chain bridge to alert users of new updates or shared notes
-7. **Asset Attachment**: Capability to attach digital assets or tokens to specific notes
-8. **Inter-Contract Integration**: Allow other smart contracts to interact with and store data in the notes contract
+## Local Setup
 
-### Long-Term Vision
+1. Install dependencies:
 
-9. **Cross-Chain Synchronization**: Extend note storage to multiple blockchain networks
-10. **Decentralized UI Hosting**: Host the frontend on IPFS or similar decentralized platforms
-11. **AI-Powered Summarization**: Optional integration with AI to help users summarize their notes
-12. **Privacy Layers**: Implement zero-knowledge proofs for completely private note content
-13. **DAO Governance**: Community-driven protocol improvements and feature prioritization
-14. **Identity Management**: Integration with decentralized identity (DID) systems for user management
+```bash
+cd frontend
+npm install
+```
 
-### Enterprise Features
+2. Configure environment in `frontend/.env`:
 
-15. **Corporate Documentation**: Adapt the system for secure corporate record-keeping
-16. **Immutable Logging**: Create time-locked logs for audit purposes
-17. **Automated Reporting**: Automatic note triggers for periodic reporting
-18. **Multi-Language Support**: Expand accessibility with internationalization
+```env
+VITE_CONTRACT_ID=CB56EHRETWRDJTPDPOYBB3E3QBCDM7WUONACL4HIUXCUBHKLIXOA7R7U
+VITE_RPC_URL=https://soroban-testnet.stellar.org
+```
 
----
+3. Run the frontend:
 
-## Technical Requirements
+```bash
+cd frontend
+npm run dev
+```
 
-- Soroban SDK
-- Rust programming language
-- Stellar blockchain network
+## Build and Deploy Contract
 
-## Getting Started
+From `contracts/hello-world`:
 
-Deploy the smart contract to Stellar's Soroban network and interact with it using the three main functions:
+```bash
+stellar contract build
+stellar contract deploy \
+  --wasm ../../target/wasm32v1-none/release/hello_world.wasm \
+  --source <YOUR_KEY_NAME> \
+  --network testnet
+```
 
-- `create_note()` - Create a new note with a title and content
-- `get_notes()` - Retrieve all stored notes from the contract
-- `delete_note()` - Remove a specific note by its ID
+After deployment, update `VITE_CONTRACT_ID` in `frontend/.env` and restart the dev server.
 
----
+## Testing
 
-**Stellar Notes DApp** - Securing Your Thoughts on the Blockchain
+```bash
+cargo test
+```
+
+## Troubleshooting
+
+- If you see `MissingValue` for `issue_certificate`, the frontend is using an old contract ID.
+- Confirm contract interface:
+
+```bash
+stellar contract info interface --id <CONTRACT_ID> --network testnet
+```
+
+The output should include `issue_certificate`, `verify_by_hash`, and `revoke_certificate`.
+
+## Security Notes
+
+- Never store document contents on-chain.
+- Store only hash and minimal metadata.
+- Any file change creates a different SHA-256 hash.
+
