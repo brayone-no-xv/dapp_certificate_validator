@@ -19,10 +19,17 @@ import {
 
 const RPC_URL = import.meta.env.VITE_RPC_URL || "https://soroban-testnet.stellar.org";
 const NETWORK = Networks.TESTNET;
+const LEGACY_NOTES_CONTRACT_ID = "CA5MNLJIQKIGIRU5ME4W5FWTSPRV7KUEYKGNKUNUUUWFEUKTKRGRQC3J";
+const CERTIFICATE_CONTRACT_ID = "CB56EHRETWRDJTPDPOYBB3E3QBCDM7WUONACL4HIUXCUBHKLIXOA7R7U";
+const envContractId = (import.meta.env.VITE_CONTRACT_ID || "").trim();
+const CONTRACT_ID =
+  !envContractId || envContractId === LEGACY_NOTES_CONTRACT_ID
+    ? CERTIFICATE_CONTRACT_ID
+    : envContractId;
 const server = new rpc.Server(RPC_URL);
 
 export function useContract() {
-  const contract = new Contract(import.meta.env.VITE_CONTRACT_ID);
+  const contract = new Contract(CONTRACT_ID);
 
   const [publicKey, setPublicKey] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
